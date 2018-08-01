@@ -1,0 +1,10 @@
+{
+  "lambda": {
+    "role": "node-red-lambda-executor",
+    "name": "node-red-lambda",
+    "region": "us-west-2"
+  },
+  "api": {
+    "id": "vkhw62old7"
+  }
+}
