@@ -55,9 +55,9 @@ exports.handler = (event, context, callback) => {
       const globalFlow = RED.nodes.getNode('a8a21d26.83b6d');
       console.log('BLABLABLA');
       console.log(globalFlow);
-
-      callback(null, globalFlow);
-
+      return callback(null, globalFlow);
     })
+
   })
+
 }
