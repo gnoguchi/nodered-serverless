@@ -4,6 +4,8 @@ const RED = require('node-red');
 const express = require('express');
 const app = express();
 const settings = require('./settings')
+const when = require('when');
+const http = require('http');
 const binaryMimeTypes = [
   'application/octet-stream',
   'font/eot',
@@ -16,14 +18,26 @@ const binaryMimeTypes = [
 
 const server = awsServerlessExpress.createServer(app, null, binaryMimeTypes)
 
-var init = (() => {
+
+var delay = (msec) => {
+  return when.promise((resolve) => {
+    setTimeout(() => {
+      resolve()
+    }, msec)
+  })
+}
+
+
+
+const init = (() => {
   RED.init(server, settings)
   // app.use(settings.httpAdminRoot,RED.httpAdmin);
   app.use(settings.httpNodeRoot, RED.httpNode);
   return RED.start().then(() => {
-    // const globalFlow = RED.nodes.getNode(['http in']);
-    // console.log(globalFlow);
+
     console.log('Node-RED server started.')
+    return delay(1000)
+
   })
 
 })()
@@ -33,16 +47,17 @@ var init = (() => {
 exports.handler = (event, context, callback) => {
   init.then(() => {
     RED.nodes.loadFlows().then(() => {
-      // awsServerlessExpress.proxy(server, event, context)
 
-      // const globalFlow = RED.nodes.getFlow('global');
+      awsServerlessExpress.proxy(server, event, context)
+
+      // const globalFlow = RED.nodes.getNode(['http in']);
+
       const globalFlow = RED.nodes.getNode('a8a21d26.83b6d');
+      console.log('BLABLABLA');
       console.log(globalFlow);
 
-      //return callback(null, globalFlow);
-       callback(null, "success");
+      callback(null, globalFlow);
 
     })
-
   })
 }

@@ -1,1 +1,85 @@
-[{"id":"bddf1530.0965f8","type":"tab","label":"Flow 1","disabled":false,"info":""},{"id":"a8a21d26.83b6d","type":"http in","z":"bddf1530.0965f8","name":"","url":"/nodered-lambda","method":"get","upload":false,"swaggerDoc":"","x":230,"y":160,"wires":[["93f887d2.df6958"]]},{"id":"4990758b.b25f3c","type":"http response","z":"bddf1530.0965f8","name":"","statusCode":"","headers":{},"x":640,"y":140,"wires":[]},{"id":"93f887d2.df6958","type":"function","z":"bddf1530.0965f8","name":"","func":"msg.payload= \"node red rodando no lambda\";\nreturn msg;","outputs":1,"noerr":0,"x":450,"y":140,"wires":[["4990758b.b25f3c"]]}]
+[
+    {
+        "id": "bddf1530.0965f8",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "a8a21d26.83b6d",
+        "type": "http in",
+        "z": "bddf1530.0965f8",
+        "name": "",
+        "url": "/nodered-lambda",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 230,
+        "y": 160,
+        "wires": [
+            [
+                "93f887d2.df6958"
+            ]
+        ]
+    },
+    {
+        "id": "4990758b.b25f3c",
+        "type": "http response",
+        "z": "bddf1530.0965f8",
+        "name": "",
+        "statusCode": "",
+        "headers": {},
+        "x": 790,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "93f887d2.df6958",
+        "type": "function",
+        "z": "bddf1530.0965f8",
+        "name": "",
+        "func": "msg.payload= \"node red rodando no lambda\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "x": 450,
+        "y": 140,
+        "wires": [
+            [
+                "d2e6dc9a.812c8",
+                "28a5a844.0a2618"
+            ]
+        ]
+    },
+    {
+        "id": "d2e6dc9a.812c8",
+        "type": "debug",
+        "z": "bddf1530.0965f8",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "x": 600,
+        "y": 260,
+        "wires": []
+    },
+    {
+        "id": "28a5a844.0a2618",
+        "type": "http request",
+        "z": "bddf1530.0965f8",
+        "name": "",
+        "method": "GET",
+        "ret": "txt",
+        "url": "http://172.18.0.1:1880/nodered-lambda",
+        "tls": "",
+        "x": 620,
+        "y": 160,
+        "wires": [
+            [
+                "4990758b.b25f3c"
+            ]
+        ]
+    }
+]
