@@ -1,10 +1,10 @@
 {
   "lambda": {
-    "role": "node-red-lambda-executor",
-    "name": "node-red-lambda",
+    "role": "nodered-lambda-executor",
+    "name": "nodered-lambda",
     "region": "us-west-2"
   },
   "api": {
-    "id": "vkhw62old7"
+    "id": "3u3bnuy0yd"
   }
 }
