@@ -1,7 +1,6 @@
 'use strict'
-const awsServerlessExpress = require('aws-serverless-express')
 const express = require('express')
-const bodyParser = require('body-parser')
+const axios = require('axios')
 const fs = require('fs')
 const AWS = require('aws-sdk')
 AWS.config.update({
@@ -9,17 +8,19 @@ AWS.config.update({
   secretAccessKey: process.env.SECRET_ACCESS_KEY
 });
 const s3 = new AWS.S3();
-const awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
 const RED = require('node-red')
-const when = require('when')
-
-
+const http = require('http')
 const app = express()
+app.use("/", express.static("public"));
 
-var settings = {
+const server = http.createServer((req, res) => {
+  app(req, res)
+}
+)
+
+const settings = {
   disableEditor: true,
-  httpAdminRoot: false,
-  httpNodeRoot: '/',
+  httpNodeRoot: "/",
   httpStatic: 'public',
   userDir: '/tmp/',
   logging: {
@@ -31,9 +32,16 @@ var settings = {
   },
   functionGlobalContext: {},
   credentialSecret: process.env.NODE_RED_SECRET || "a-secret-key",
-  flowFile: '/tmp/' + process.env.FLOW_NAME
-
-};
+  flowFile: '/tmp/' + process.env.FLOW_NAME,
+  editorTheme: {
+    palette: {
+      catalogues: [
+        "https://catalogue.nodered.org/catalogue.json",
+        "http://catalog.shared.sinapse-ps.com:9101/catalogue.json"
+      ]
+    }
+  }
+}
 
 const binaryMimeTypes = [
   'application/javascript',
@@ -74,19 +82,19 @@ var delay = (msec) => {
 const init = (() => {
   const flowFile = fs.createWriteStream('/tmp/' + process.env.FLOW_NAME);
   s3.getObject({
-    Bucket: 'nodered-lambda-flows',
+    Bucket: process.env.S3_BUCKET,
     Key: process.env.FLOW_NAME
   }).createReadStream().pipe(flowFile)
 
   const configFile = fs.createWriteStream('/tmp/' + process.env.CONFIG_FLOW);
   s3.getObject({
-    Bucket: 'nodered-lambda-flows',
+    Bucket: process.env.S3_BUCKET,
     Key: process.env.CONFIG_FLOW
   }).createReadStream().pipe(configFile)
 
   const flowCredFile = fs.createWriteStream('/tmp/' + process.env.FLOW_NAME.slice(0, process.env.FLOW_NAME.indexOf(".")) + '_cred.json');
   s3.getObject({
-    Bucket: 'nodered-lambda-flows',
+    Bucket: process.env.S3_BUCKET,
     Key: process.env.FLOW_NAME.slice(0, process.env.FLOW_NAME.indexOf(".")) + '_cred.json'
   }).createReadStream().pipe(flowCredFile)
 
@@ -101,9 +109,35 @@ const init = (() => {
 })()
 
 exports.handler = (event, context) => {
+  
+  context.callbackWaitsForEmptyEventLoop = false
+  let dataBody = null
+  let buff = null
+  if (event.body !== null && event.body !== undefined) {
+    buff = new Buffer(event.body, 'base64')
+    dataBody = buff.toString('ascii')
+  }
   init.then(() => {
+    server.listen(1880)
     RED.nodes.loadFlows().then(() => {
-      awsServerlessExpress.proxy(server, event, context)
+
+      axios({
+        method: event.httpMethod,
+        url: 'http://localhost:1880' + event.path,
+        data: JSON.parse(dataBody)
+      }).then((response) => {
+        const responseBody = {
+          statusCode: 200,
+          headers: {
+            "Function-Name": ""
+          },
+          body: JSON.stringify(response.data),
+          isBase64Encoded: false
+        }
+        callback(null, responseBody)
+      }).catch((err) => {
+        callback(err)
+      })
     })
   })
 }
